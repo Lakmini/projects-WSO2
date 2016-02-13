@@ -16,7 +16,7 @@
  */
 include("insertdata.jag");
 //make the db connection through the UniDash_DS datasource
-var db = new Database("UniDash_DS");
+var db = new Database("UnifiedDashboards");
 //calculate the date which is 6 months back from current date
 var begin = new Date();
 begin.setDate(begin.getDate() - 180);
@@ -36,12 +36,17 @@ var MAX_DUE_DATE = [end.getFullYear(), ('0' + (end.getMonth() + 1)).slice(-2), (
  */
 function putDbRecords() {
     /**
-     * select version_id with maximum timestamp which are in selected time range and the
+     * select version_id with maximum timestamp from today results which are in selected time range and the
      * status="open" and due_date!=<due_date/> and the version should be GA-versions
      */
-    var max_time_stamp_results = db.query("SELECT version_id,MAX(_timestamp) AS time FROM RM_VERSION WHERE status = '" + DEFAULT_STATUS + "' AND due_date != '" + DEFAULT_DUE_DATE + "' AND due_date < '" + MAX_DUE_DATE + "' AND due_date > '" + MIN_DUE_DATE + "' AND version_name LIKE '%GA%' GROUP BY version_id;");
+    var max_time_stamp_results=db.query("select version_id,MAX(_timestamp) as time  from RM_VERSION where status='"+DEFAULT_STATUS+"' and due_date!='"+DEFAULT_DUE_DATE+"' and due_date<'"+MAX_DUE_DATE+"' and due_date > '"+MIN_DUE_DATE+"' and version_name like '%GA%' and date(_timestamp)=CURDATE() group by version_id;");
+    //if result set for the current date is not exist then select the result set with latest timestamp
+if(max_time_stamp_results.length==0)
+{
+max_time_stamp_results=db.query("select version_id,MAX(_timestamp) as time  from RM_VERSION where status='"+DEFAULT_STATUS+"' and due_date!='"+DEFAULT_DUE_DATE+"' and due_date<'"+MAX_DUE_DATE+"' and due_date > '"+MIN_DUE_DATE+"' and version_name like '%GA%' group by version_id;");
+}
 
- var latest_records=[];
+    var latest_records=[];
  for (var i in max_time_stamp_results) {
  //convert date in to db timestamp format
  var temp_date=new Date(max_time_stamp_results[i].time);
@@ -53,7 +58,8 @@ function putDbRecords() {
     ('00' + temp_date.getUTCSeconds()).slice(-2);
 
   var data_set = db.query("SELECT DISTINCT t.version_id,t.project_id,t.version_name,t.due_date,t.status,t._timestamp FROM(SELECT  RM_VERSION.version_id, MAX(RM_VERSION._timestamp) AS  x FROM RM_VERSION  WHERE RM_VERSION.version_id = "+max_time_stamp_results[i].version_id+" AND  RM_VERSION._timestamp < '"+max_time_stamp_results[i].time+"') AS  m INNER JOIN RM_VERSION  AS t ON t.version_id = m.version_id  AND t._timestamp = m.x; ");
- if(data_set.length!=0)
+
+if(data_set.length!=0)
 {
 //if there is a second max result set for the given version id then push that result set in to latest_records array
 latest_records.push({
@@ -70,7 +76,13 @@ latest_records.push({
  }
 
  // get the product details with maximum time stamp
- var result = db.query("SELECT DISTINCT t.version_id,t.project_id,p.Project_Name,t.version_name,t.due_date,t.status,t._timestamp FROM(SELECT version_id, MAX(_timestamp) AS x FROM RM_VERSION  GROUP BY version_id)  AS m INNER  JOIN  RM_VERSION  AS  t  on  t.version_id = m.version_id  AND  t._timestamp = m.x  AND  t.status = '"+DEFAULT_STATUS+"'  AND  t.due_date != '"+DEFAULT_DUE_DATE+"'  AND  t.due_date > '"+MIN_DUE_DATE+"' AND  t.due_date < '"+MAX_DUE_DATE+"'  AND  t.version_name  LIKE  '%GA%' LEFT JOIN (select a.Project_id,a.Project_Name,a._timestamp from (select Project_id,MAX(_timestamp) as b from RM_PROJECT group by project_id) as c inner join RM_PROJECT as a where c.b=a._timestamp and c.Project_id=a.Project_id) AS p ON p.project_id=t.project_id;");
+ var result=db.query("select distinct t.version_id,t.project_id,p.Project_Name,t.version_name,t.due_date,t.status,t._timestamp from (select version_id,MAX(_timestamp) as x from RM_VERSION where date(_timestamp)=CURDATE() group by version_id) as m inner join RM_VERSION as t on t.version_id=m.version_id and t._timestamp=m.x and t.status='"+DEFAULT_STATUS+"' and t.due_date!='"+DEFAULT_DUE_DATE+"' and t.due_date>'"+MIN_DUE_DATE+"' and t.due_date<'"+MAX_DUE_DATE+"' and t.version_name LIKE '%GA%' left join (select a.Project_id,a.Project_Name,a._timestamp from (select Project_id,MAX(_timestamp) as b from RM_PROJECT group by project_id) as c inner join RM_PROJECT as a where c.b=a._timestamp and c.Project_id=a.Project_id) as p on   p.project_id=t.project_id;");
+ //if there is no data with current date then get the latest timestamp data
+if(result.length==0)
+{
+result=db.query("select distinct t.version_id,t.project_id,p.Project_Name,t.version_name,t.due_date,t.status,t._timestamp from (select version_id,MAX(_timestamp) as x from RM_VERSION where  group by version_id) as m inner join RM_VERSION as t on t.version_id=m.version_id and t._timestamp=m.x and t.status='"+DEFAULT_STATUS+"' and t.due_date!='"+DEFAULT_DUE_DATE+"' and t.due_date>'"+MIN_DUE_DATE+"' and t.due_date<'"+MAX_DUE_DATE+"' and t.version_name LIKE '%GA%' left join (select a.Project_id,a.Project_Name,a._timestamp from (select Project_id,MAX(_timestamp) as b from RM_PROJECT group by project_id) as c inner join RM_PROJECT as a where c.b=a._timestamp and c.Project_id=a.Project_id) as p on   p.project_id=t.project_id;");
+
+}
  /**
   * compare  old updated due_date details of the product and
   * put in to a table if there is any new change of due_date
