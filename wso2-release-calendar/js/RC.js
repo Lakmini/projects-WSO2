@@ -17,7 +17,7 @@ $.post("/portal/controllers/apis/release-calendar-gadget/releasecalendar.jag", {
     //Get the data from hosted jaggery files and parse it to JSON format
     var data = JSON.parse(datax);
     // sort the array as delayed versions first and then the upcoming versions
-    data.sort(function(a, b) {
+    data.sort(function (a, b) {
         return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
     });
 
@@ -81,7 +81,7 @@ $.post("/portal/controllers/apis/release-calendar-gadget/releasecalendar.jag", {
                 var values = [];
                 var dates = item.old_due_dates;
                 dates[dates.length] = item.due_date;
-                var flag=0;
+                var flag = 0;
                 /**
                  * The following for loop is to draw the release lag.
                  * The release lag represent using orange color line
@@ -91,82 +91,82 @@ $.post("/portal/controllers/apis/release-calendar-gadget/releasecalendar.jag", {
                  * on the orange color bar
                  */
                 for (var l = 0; l < dates.length - 1; l++) {
-                    for(var k=0;k<dates.length-1;k++)
-                    {
-                        if(new Date(dates[k]).getTime()>new Date(dates[k+1]).getTime())
-                        {
-                            flag=1;
+                    for (var k = 0; k < dates.length - 1; k++) {
+                        //check du_date forwarded products and if so flag set to 1
+                        if (new Date(dates[k]).getTime() > new Date(dates[k + 1]).getTime()) {
+                            flag = 1;
                             break;
 
                         }
                     }
-                    if(flag==1)
-                    {
+                    /**
+                     * if it is a forwarded product then draw a orange bar between two dates and
+                     * draw a green dot for new date
+                     */
+                    if (flag == 1) {
 
-                        if(dates[l]>dates[l+1])
-                        {
+                        if (dates[l] > dates[l + 1]) {
                             values.push(
                                 {
-                                    "from" : "/Date("
-                                    + new Date(dates[l+1]).getTime() + ")/",
-                                    "to" : "/Date("
+                                    "from": "/Date("
+                                    + new Date(dates[l + 1]).getTime() + ")/",
+                                    "to": "/Date("
                                     + new Date(dates[l]).getTime()
                                     + ")/",
-                                    "lable" : " ",
-                                    "customClass" : "ganttOrange"
+                                    "lable": " ",
+                                    "customClass": "ganttOrange"
                                 });
                         }
-                        else
-                        {
+                        else {
+
                             values.push(
                                 {
-                                    "from" : "/Date("
+                                    "from": "/Date("
                                     + new Date(dates[l]).getTime() + ")/",
-                                    "to" : "/Date("
-                                    + new Date(dates[l+1]).getTime()
+                                    "to": "/Date("
+                                    + new Date(dates[l + 1]).getTime()
                                     + ")/",
-                                    "lable" : " ",
-                                    "customClass" : "ganttOrange"
+                                    "lable": " ",
+                                    "customClass": "ganttOrange"
                                 },
                                 {
-                                    "from" : "/Date("
+                                    "from": "/Date("
                                     + new Date(dates[l]).getTime() + ")/",
-                                    "to" : "/Date(" + new Date(dates[l]).getTime()
+                                    "to": "/Date(" + new Date(dates[l]).getTime()
                                     + ")/",
-                                    "lable" : " ",
-                                    "customClass" : "ganttRed"
+                                    "lable": " ",
+                                    "customClass": "ganttRed"
                                 }
-
                             );
                         }
 
                     }
-                    else
-                    {
+                    else {
+                        //else draw the normal release lag
                         values.push(
                             {
-                                "from" : "/Date("
+                                "from": "/Date("
                                 + new Date(dates[l]).getTime() + ")/",
-                                "to" : "/Date("
+                                "to": "/Date("
                                 + new Date(dates[l + 1]).getTime()
                                 + ")/",
-                                "lable" : " ",
-                                "customClass" : "ganttOrange"
+                                "lable": " ",
+                                "customClass": "ganttOrange"
                             },
 
                             {
-                                "from" : "/Date("
+                                "from": "/Date("
                                 + new Date(dates[l]).getTime() + ")/",
-                                "to" : "/Date(" + new Date(dates[l]).getTime()
+                                "to": "/Date(" + new Date(dates[l]).getTime()
                                 + ")/",
-                                "lable" : " ",
-                                "customClass" : "ganttRed"
+                                "lable": " ",
+                                "customClass": "ganttRed"
                             });
                     }
 
 
-
                 }
+                //draw the green dot for new date
                 values.push({
                         "from": "/Date(" + new Date(dates[dates.length - 1]).getTime() + ")/",
                         "to": "/Date(" + new Date(dates[dates.length - 1]).getTime() + ")/",
@@ -215,6 +215,5 @@ function getdata(result) {
     });
 
 };
-
 
 

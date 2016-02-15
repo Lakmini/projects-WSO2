@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-$.post("/portal/controllers/apis/table.jag", {
+$.post("/portal/controllers/apis/patching-trend-table/table.jag", {
         action: "GET"
     },
     function (datax) {
