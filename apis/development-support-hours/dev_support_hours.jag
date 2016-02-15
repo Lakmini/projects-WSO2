@@ -1,0 +1,43 @@
+<%
+//make the db connection through the UniDash_DS datasource
+//var db = new Database("UnifiedDashboards");
+var db = new Database("jdbc:mysql://localhost:3306/UnifiedDashboard", "root", "");
+
+function getData()
+{
+    //get data from SF table
+    var db_query_SF_Support_Hours= "SELECT t.SupportAccountKey, t.DevelopmentSupportHours, t._timestamp  FROM (SELECT SupportAccountKey,MAX(_timestamp) AS timestamp FROM SF_SUPPORT_HOURS GROUP BY SupportAccountKey) AS m INNER JOIN SF_SUPPORT_HOURS AS t ON  m.SupportAccountKey=t.SupportAccountKey and m.timestamp=t._timestamp;";
+    var SF_result_set= db.query(db_query_SF_Support_Hours);
+    //print(SF_result_set);
+    //get data from JIRA table
+    var db_query_JIRA_Support_Hours="select t.projectKey, t.name, t.hoursConsumed,t.timestamp  from (select projectKey,MAX(timestamp) as timestamp from SUPJ_Project_Time_Consumption group by projectKey) as m inner join SUPJ_Project_Time_Consumption as t on  m.projectKey=t.projectKey and m.timestamp=t.timestamp;";
+    var JIRA_result_set= db.query(db_query_JIRA_Support_Hours);
+    //print(JIRA_result_set);
+
+    var remaining_hours_data=[];
+    if(SF_result_set.length!=0 && JIRA_result_set!=0) {
+        for (var i in SF_result_set) {
+            if (SF_result_set[i].DevelopmentSupportHours != null) {
+                for (var j in JIRA_result_set) {
+                    if (SF_result_set[i].SupportAccountKey == JIRA_result_set[j].projectKey) {
+                        remaining_hours_data.push({
+                            "SupportAccountKey": SF_result_set[i].SupportAccountKey,
+                            "Account_Name": JIRA_result_set[j].name,
+                            "remaining_hours": SF_result_set[i].DevelopmentSupportHours - JIRA_result_set[j].hoursConsumed
+
+                        });
+                        break;
+                    }
+                }
+            }
+        }
+        print(remaining_hours_data);
+    }
+    else{
+        print("Error");
+    }
+
+
+}
+getData();
+%>
