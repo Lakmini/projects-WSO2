@@ -23,10 +23,11 @@ function getRecords() {
     var query_project_list = "SELECT * FROM PRODUCT_MAPPING;";
     var product_list = db.query(query_project_list);
     print(product_list);
-    db.close();
     return product_list;
 }
 getRecords();
+db.close();
 
 %>
+
 

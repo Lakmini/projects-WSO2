@@ -116,9 +116,6 @@ function drawBarChart(start_date, end_date, data) {
     var to = [end_date.getFullYear(),
         ('0' + (end_date.getMonth() + 1)).slice(-2),
         ('0' + end_date.getDate()).slice(-2)].join('-');
-    /*  // bind with html labels
-     $("label[for='from']").html(from);
-     $("label[for='to']").html(to);*/
 
     var k = 0;
     // array to store the data set between the selected time period
@@ -229,3 +226,4 @@ function createArray(result) {
     });
 
 }
+

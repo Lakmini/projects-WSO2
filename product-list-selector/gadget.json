@@ -7,7 +7,7 @@
         "url": "store://gadget/product-list-selector/index.xml"
     },
     "notify": {
-        "select": {
+        "data-publisher": {
             "type": "address",
             "description": "This notifies selected state"
         }

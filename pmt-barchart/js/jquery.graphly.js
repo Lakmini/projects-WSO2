@@ -16,8 +16,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 
 (function($){
-    $.fn.graphly = function(options) {
-
+    $.fn.graphly = function(options) {  
+        
         var settings = $.extend({
             'data'          : null,
             'type'          : 'bar',
@@ -33,7 +33,7 @@
             'removeBorders' : false,
             'customTheme'   : null
         }, options);
-
+        
         var globals = {
             'width'             : 0,
             'height'            : 0,
@@ -53,7 +53,7 @@
             'right'             : 0,
             'decimalCount'      : 0
         };
-
+        
         var methods = {
             initialize : function(canvas, ctx) {
                 var barCount = 0;
@@ -61,22 +61,22 @@
                 var smallestValue = null;
                 var largestLabel = null;
                 var decimalCount = null;
-
+                
                 // If we're using a line graph and the default theme, switch to a
                 // slightly different version of the default theme which is more
                 // suited to line graphs due to the possibility of overlapping.
                 if (settings.type == 'line' && settings.theme == 'default') {
-                    settings.theme = 'default-line-graph';
+                    settings.theme = 'default-line-graph';   
                 }
-
+                
                 // If a custom theme was specified, set it as the theme to use
                 // otherwise load the theme by name.
                 if (settings.customTheme == null) {
                     methods.loadTheme(settings.theme);
                 }
                 else {
-                    $.each(settings.customTheme.colors, function(i, color) {
-                        globals.colors[i] = color.fill;
+                   $.each(settings.customTheme.colors, function(i, color) {
+                        globals.colors[i] = color.fill; 
                         globals.borderColors[i] = color.stroke;
                     });
                 }
@@ -84,62 +84,62 @@
                 // Cache the dimensions of the current canvas.
                 globals.width = settings.width == null ? $(canvas).width() : settings.width;
                 globals.height = settings.height == null ? $(canvas).height() : settings.height;
-
+                
                 // Setup a default padding of 15 pixels.
                 globals.paddingLeft = settings.paddingLeft < 15 ? 15 : settings.paddingLeft;
                 globals.paddingTop = settings.paddingTop < 15 ? 15 : settings.paddingTop;
                 globals.paddingRight = settings.paddingRight < 15 ? 15 : settings.paddingRight;
                 globals.paddingBottom = settings.paddingBottom < 15 ? 15 : settings.paddingBottom;
-
+                    
                 $.each(settings.data.groups, function(i, group) {
                     // Calculate the dimensions of the current label and update
                     // the largest label width, if it's a line graph and required.
                     if (settings.type == 'line') {
                         var currentLabelWidth = ctx.measureText(group.label).width;
                         if (largestLabel == null || largestLabel < currentLabelWidth) {
-                            largestLabel = currentLabelWidth;
+                            largestLabel = currentLabelWidth;   
                         }
                     }
-
+                    
                     $.each(group.values, function(i, entity) {
                         var value = settings.type == 'bar' ? entity.value : entity;
-
+                        
                         // Update the largest value, if needed.
                         if (largestValue == null || largestValue < value) {
-                            largestValue = value;
+                            largestValue = value;   
                         }
-
+                        
                         // Update the smallest value, if needed.
                         if (smallestValue == null || smallestValue > value) {
-                            smallestValue = value;
+                            smallestValue = value;   
                         }
-
+                        
                         // Update the decimal count value, if needed.
                         var currentDecimalPlaces = methods.getDecimalPlaces(value);
                         if (decimalCount == null || decimalCount < currentDecimalPlaces) {
                             decimalCount = currentDecimalPlaces;
                         }
-
+                        
                         // Calculate the dimensions of the current label and update
                         // the largest label width, if needed.
                         if (settings.type == 'bar') {
                             var currentLabelWidth = ctx.measureText(entity.label).width;
                             if (largestLabel == null || largestLabel < currentLabelWidth) {
-                                largestLabel = currentLabelWidth;
+                                largestLabel = currentLabelWidth;   
                             }
                         }
-
+                        
                         // If a custom colour has been specified, copy it into
                         // the copy of __graphly_bar_colors stored in globals.
                         if (entity.color != undefined) {
-                            globals.colors[i] = entity.color;
+                            globals.colors[i] = entity.color;   
                         }
-
+                        
                         // Increment the bar count.
                         barCount += 1;
                     });
-                });
-
+                });                
+                
                 // Save the calculated values into the globals array.
                 globals.barCount = barCount;
                 globals.largestValue = largestValue;
@@ -147,14 +147,14 @@
                 globals.largestLabelWidth = largestLabel;
                 globals.decimalCount = decimalCount;
             },
-            loadTheme : function(themeName) {
+            loadTheme : function(themeName) {                
                 $.each(__graphly_themes.themes, function(i, theme) {
                     if (theme.name == themeName) {
                         $.each(theme.colors, function(i, color) {
-                            globals.colors[i] = color.fill;
+                            globals.colors[i] = color.fill; 
                             globals.borderColors[i] = color.stroke;
                         });
-
+                        
                         return false;
                     }
                 });
@@ -169,10 +169,10 @@
             },
             getStrokeColor: function(index) {
                 if (index >= globals.borderColors.length) {
-                    return '#4963ae';
+                    return '#4963ae';   
                 }
                 else {
-                    return globals.borderColors[index];
+                    return globals.borderColors[index];   
                 }
             },
             drawVerticalLabel : function(ctx, x, y) {
@@ -188,28 +188,28 @@
                 var y = globals.paddingTop + 5;
                 var offset = y;
                 var labels = new Array();
-
+                
                 // Loop through the groups to get a distinct list of labels.
                 $.each(settings.data.groups, function(i, group) {
                     if (settings.type == 'bar') {
                         $.each(group.values, function(i, entity) {
                             if ($.inArray(entity.label, labels) == -1) {
-                                labels[labels.length] = entity.label;
+                                labels[labels.length] = entity.label;   
                             }
                         });
                     }
                     else {
                         if ($.inArray(group.label, labels) == -1) {
-                            labels[labels.length] = group.label;
+                            labels[labels.length] = group.label;   
                         }
                     }
                 });
-
+                
                 ctx.save();
                 ctx.font = "bold 14px \"lucida grande\",tahoma,verdana,arial,sans-serif";
                 ctx.fillText('Legend', x, offset);
                 ctx.font = "11px \"lucida grande\",tahoma,verdana,arial,sans-serif";
-
+                
                 // Draw each label and a small rectangle with a matching colour.
                 $.each(labels, function(i, label) {
                     offset += 16;
@@ -221,7 +221,7 @@
                     ctx.textBaseline = 'top';
                     ctx.fillText(label, x + 13, offset - 1);
                 });
-
+                
                 ctx.restore();
             },
             drawValueLabels : function(ctx) {
@@ -230,81 +230,81 @@
                 var labelGap = chartHeight / 10;
                 var largestLabel = null;
                 var labels = new Array();
-
+                
                 ctx.save();
                 ctx.font = "11px \"lucida grande\",tahoma,verdana,arial,sans-serif";
                 ctx.textBaseline = 'middle';
                 ctx.textAlign = 'right';
                 ctx.strokeStyle = "#CCCCCC";
                 ctx.lineWidth = 1;
-
+                
                 // Calculate the label values and dimensions.
-                if(totalSteps<10)
-                {
-                    var labelGap = chartHeight / totalSteps;
-                    for(var i=0;i<=totalSteps;i++)
-                    {
-                        var value=(i-totalSteps)*-1;
-                        var dimensions = ctx.measureText(methods.roundToFixed(value, globals.decimalCount));
-                        if (largestLabel == null || largestLabel < totalSteps) {
-                            largestLabel = totalSteps;
-                        }
-
-                        labels[i] = methods.roundToFixed(value, globals.decimalCount);
-
+if(totalSteps<10)
+{
+    var labelGap = chartHeight / totalSteps;
+for(var i=0;i<=totalSteps;i++)
+{
+var value=(i-totalSteps)*-1;
+ var dimensions = ctx.measureText(methods.roundToFixed(value, globals.decimalCount));
+                    if (largestLabel == null || largestLabel < totalSteps) {
+                        largestLabel = totalSteps;
                     }
+                    
+                    labels[i] = methods.roundToFixed(value, globals.decimalCount);
 
-                    // Increment the left margin by the largest label width.
-                    globals.left += largestLabel;
+}
+ 
+                // Increment the left margin by the largest label width.
+                globals.left += largestLabel;
+                
+                // Draw the labels and the horizontal markers.
+                $.each(labels, function(i, label) {
+                    ctx.fillText(label, globals.left, globals.top + (i * labelGap));
+                    ctx.beginPath();
+                    ctx.moveTo(globals.left + 5, Math.round(globals.top + (i * labelGap)) + 0.5);
+                    ctx.lineTo(globals.right, Math.round(globals.top + (i * labelGap)) + 0.5);
+                    ctx.stroke();
+                    ctx.closePath();
+                });
+                
+                ctx.restore();
 
-                    // Draw the labels and the horizontal markers.
-                    $.each(labels, function(i, label) {
-                        ctx.fillText(label, globals.left, globals.top + (i * labelGap));
-                        ctx.beginPath();
-                        ctx.moveTo(globals.left + 5, Math.round(globals.top + (i * labelGap)) + 0.5);
-                        ctx.lineTo(globals.right, Math.round(globals.top + (i * labelGap)) + 0.5);
-                        ctx.stroke();
-                        ctx.closePath();
-                    });
-
-                    ctx.restore();
-
-                }
-                else
-                {
-
-                    for (var i = 0; i <= 10; i++) {
-                        var value = i < 10 ? (totalSteps - (totalSteps * ((i * 10) / 100))) - (globals.smallestValue * -1) : globals.smallestValue;
-                        var dimensions = ctx.measureText(methods.roundToFixed(value, globals.decimalCount));
-                        if (largestLabel == null || largestLabel < dimensions.width) {
-                            largestLabel = dimensions.width;
-                        }
-
-                        labels[i] = methods.roundToFixed(value, globals.decimalCount);
+}
+else
+{
+   
+             for (var i = 0; i <= 10; i++) {
+                    var value = i < 10 ? (totalSteps - (totalSteps * ((i * 10) / 100))) - (globals.smallestValue * -1) : globals.smallestValue;
+                    var dimensions = ctx.measureText(methods.roundToFixed(value, globals.decimalCount));
+                    if (largestLabel == null || largestLabel < dimensions.width) {
+                        largestLabel = dimensions.width;
                     }
-
-                    // Increment the left margin by the largest label width.
-                    globals.left += largestLabel;
-
-                    // Draw the labels and the horizontal markers.
-                    $.each(labels, function(i, label) {
-                        ctx.fillText(label, globals.left, globals.top + (i * labelGap));
-                        ctx.beginPath();
-                        ctx.moveTo(globals.left + 5, Math.round(globals.top + (i * labelGap)) + 0.5);
-                        ctx.lineTo(globals.right, Math.round(globals.top + (i * labelGap)) + 0.5);
-                        ctx.stroke();
-                        ctx.closePath();
-                    });
-
-                    ctx.restore();
+                    
+                    labels[i] = methods.roundToFixed(value, globals.decimalCount);
                 }
-
+ 
+                // Increment the left margin by the largest label width.
+                globals.left += largestLabel;
+                
+                // Draw the labels and the horizontal markers.
+                $.each(labels, function(i, label) {
+                    ctx.fillText(label, globals.left, globals.top + (i * labelGap));
+                    ctx.beginPath();
+                    ctx.moveTo(globals.left + 5, Math.round(globals.top + (i * labelGap)) + 0.5);
+                    ctx.lineTo(globals.right, Math.round(globals.top + (i * labelGap)) + 0.5);
+                    ctx.stroke();
+                    ctx.closePath();
+                });
+                
+                ctx.restore();
+}
+               
             },
             drawBars : function(ctx) {
                 ctx.save();
                 ctx.font = "11px \"lucida grande\",tahoma,verdana,arial,sans-serif";
                 globals.left += 5;
-
+                
                 var x = globals.left;
                 var chartWidth = globals.right - globals.left;
                 var groupSpacing = 15;
@@ -312,40 +312,40 @@
                 var totalSteps = (globals.smallestValue * -1) + globals.largestValue;
                 var stepHeight = (globals.bottom - globals.top) / totalSteps;
                 var zeroPoint = globals.bottom - ((globals.smallestValue * -1) * stepHeight);
-
+                
                 // Reduce the fill width of the bar if we are using borders
                 if (!settings.removeBorders) {
                     barWidth -= 9 // 4 pixels of border space + 5 for bar spacing
                 }
-
+                
                 $.each(settings.data.groups, function(i, group) {
                     x += groupSpacing;
-
+                    
                     $.each(group.values, function(i, entity) {
                         // Draw the bar
                         var barHeight = (entity.value * stepHeight) * -1;
                         if (!settings.removeBorders) {
                             barHeight += 2;
                         }
-
+                        
                         ctx.beginPath();
                         ctx.rect(x, zeroPoint, barWidth, barHeight);
                         ctx.fillStyle = methods.getFillColor(i);
                         ctx.fill();
-
+                        
                         if (!settings.removeBorders) {
                             ctx.lineWidth = 2;
                             ctx.strokeStyle = methods.getStrokeColor(i);
                             ctx.stroke();
                         }
-
+                        
                         ctx.closePath();
-
+                        
                         // Increment the X point and draw a label if the graph
                         // isn't displaying multiple groups.
                         var distance = !settings.removeBorders ? barWidth + 9 : barWidth;
                         x += distance;
-
+                        
                         if (settings.data.groups.length == 1) {
                             var labelX = !settings.removeBorders ? (x - 4) - (distance / 2) : (x - (barWidth / 2));
                             ctx.textAlign = "center";
@@ -353,7 +353,7 @@
                             ctx.fillText(entity.label, labelX, globals.bottom + 15);
                         }
                     });
-
+                    
                     // If this is a grouped graph, we need to draw the group label.
                     if (settings.data.groups.length > 1) {
                         ctx.textAlign = 'center';
@@ -361,7 +361,7 @@
                         ctx.fillText(group.label, (x - ((group.values.length / 2) * (!settings.removeBorders ? barWidth + 9 : barWidth))) - (!settings.removeBorders ? 5 : 0), globals.bottom + 15,  globals.bottom + 15);
                     }
                 });
-
+                
                 ctx.restore();
             },
             drawAxis : function(ctx) {
@@ -375,7 +375,7 @@
                 ctx.lineTo(globals.right, globals.bottom + 0.5);
                 ctx.stroke();
                 ctx.closePath();
-
+                
                 if (globals.smallestValue < 0) {
                     var zeroPoint = globals.bottom - ((globals.smallestValue * -1) * stepHeight);
                     ctx.beginPath();
@@ -408,36 +408,36 @@
                 var x = globals.left;
                 var drawnLabels = false;
                 var rectanglePoints = new Array();
-
+                
                 $.each(settings.data.groups, function(i, group) {
                     var previousPointY = zeroPoint;
                     var previousPointX = globals.left + (plotSpacing / 2);
                     var groupFillColor = methods.getFillColor(i);
                     var groupStrokeColor = methods.getStrokeColor(i);
                     x = globals.left + (plotSpacing / 2);
-
+                    
                     $.each(group.values, function(i, value) {
                         var lineHeight = globals.bottom - (value * stepHeight);;
                         ctx.beginPath();
-
+                        
                         ctx.strokeStyle = groupFillColor;
                         ctx.lineWidth = 3;
                         if (i > 0) {
                             ctx.moveTo(previousPointX, previousPointY);
                             ctx.lineTo(x + 0.5, lineHeight);
                         }
-
+                        
                         previousPointX = x + 0.5;
                         previousPointY = lineHeight;
                         ctx.stroke();
                         rectanglePoints[i] = new Array(previousPointX, previousPointY);
                         ctx.closePath();
-
+                        
                         // Increment the X point and draw a label if required.
                         var distance = plotSpacing + 9;
                         x += distance;
                         if (!drawnLabels) {
-                            // The plotSpacing / 2 is removed in the below variable as
+                            // The plotSpacing / 2 is removed in the below variable as 
                             // we X is placed at the center point of each label in line graphs.
                             var labelX = (x - 4) - (distance / 2) - (plotSpacing / 2);
                             ctx.textAlign = "center";
@@ -445,26 +445,26 @@
                             ctx.fillText(settings.data.points[i], labelX, globals.bottom + 15);
                         }
                     });
-
+                    
                     $.each(rectanglePoints, function(i, point) {
                         ctx.rect(point[0] - 5, point[1] - 5, 10, 10);
                         ctx.fillStyle = groupStrokeColor;
                         ctx.fill();
                     });
-
+                    
                     drawnLabels = true;
                     x = globals.left + (plotSpacing / 2);
                 });
-
+                
                 ctx.restore();
             }
         };
-
+        
         return this.each(function() {
             var c = $(this)[0];
             var ctx = c.getContext("2d");
             methods.initialize(this, ctx);
-
+            
             // If we are showing a legend, we need to add additional padding to the right
             // to ensure we have enough room. To Determine how much we need we'll need to
             // check the largest label width and add a few extra pixels to ensure spacing
@@ -473,66 +473,66 @@
                 globals.paddingRight += globals.largestLabelWidth + 55;
                 methods.drawLegend(ctx);
             }
-
+            
             // Store the boundaries of the chart and other tidbits for quick access
             globals.top = globals.paddingTop;
             globals.bottom = globals.height - globals.paddingBottom;
             globals.left = globals.paddingLeft;
             globals.right = globals.width - globals.paddingRight;
             var chartHeight = globals.bottom - globals.top;
-
+            
             // Draw the labels if the displayLabels flag is set to true.
             if (settings.showLabels) {
                 // Reduce the bottom point of the graph by 35 pixels and draw the horizontal label.
-                globals.bottom -= 35;
+                globals.bottom -= 35;   
                 ctx.font = "bold 14px \"lucida grande\",tahoma,verdana,arial,sans-serif";
                 ctx.textAlign = 'center';
                 ctx.fillText(settings.data.xLabel, (globals.right + globals.left) / 2, globals.bottom + 45);
-
+                
                 // Draw the vertical label and increment the left point by 14 pixels.
                 methods.drawVerticalLabel(ctx, globals.paddingLeft, globals.top + (chartHeight / 2));
-                globals.left += 14;
+                globals.left += 14;                
             }
-
+            
             // Draw the value labels, starting from zero if the lowest value is equal to or
             // more than zero, across ten points along the y-axis.
             globals.smallestValue = globals.smallestValue > 0 ? 0 : globals.smallestValue;
             methods.drawValueLabels(ctx);
-
+            
             // Draw the bars or lines and the graph axis.
             if (settings.type == "bar") {
-                methods.drawBars(ctx);
+                methods.drawBars(ctx);   
             }
             else {
-                methods.drawLines(ctx);
+                methods.drawLines(ctx);   
             }
-
+            
             methods.drawAxis(ctx);
         });
     };
-
+    
     // Forgive me for polluting the global sea :(
-    var __graphly_themes =
-    {
-        themes: [
-            {
-                name: 'default',
-                colors: [
-                    {
-                        fill: '#5c7cda',
-                        stroke: '#4963ae'
-                    }
-                ]
-            },
-            {
-                name: 'default-line-graph',
-                colors: [
-                    {
-                        fill: '#5c7cda',
-                        stroke: '#4963ae'
-                    }
-                ]
-            }
-        ]
-    };
+    var __graphly_themes = 
+        {
+            themes: [
+                {
+                    name: 'default',
+                    colors: [
+                      {
+                            fill: '#5c7cda',
+                            stroke: '#4963ae'
+                        }
+                    ]
+                },
+                {
+                    name: 'default-line-graph',
+                    colors: [
+                        {
+                            fill: '#5c7cda',
+                            stroke: '#4963ae'
+                        }
+                    ]
+                }
+            ]
+        };
 })(jQuery);

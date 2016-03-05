@@ -14,19 +14,11 @@
  * limitations under the License.
  */
 $.post("/portal/controllers/apis/pmt-line-chart/pmt-line-chart-data.jag", {
-    action: "GET"
-}, function (datax) {
+    action : "GET"
+}, function(datax) {
 
     // Get the data from hosted Jaggery files and parse it
     var data = JSON.parse(datax);
-    // go through each data element and reformat the product name by removing
-    // version number and unnecessary spaces
-    for (var i in data) {
-        var temp_name = data[i].OverviewProduct.replace(/\d+/g, '').split('.')
-            .join("");
-        data[i].OverviewProduct = $.trim(temp_name);
-
-    }
     // set begining of the initial time period as 365 days back from current
     // date
     var begin = new Date();
@@ -46,19 +38,19 @@ $.post("/portal/controllers/apis/pmt-line-chart/pmt-line-chart-data.jag", {
 function dataBind(data) {
     // date picker to select begin date of the time period
     $('#datepicker').datepicker({
-        changeMonth: true,// add the month selector
-        changeYear: true,// add the year selector
-        dateFormat: "yy-mm-dd",// keep date format as yy-mm-dd
-        maxDate: new Date(),// maximum active date is set to today
-        onSelect: checkDate
+        changeMonth : true,// add the month selector
+        changeYear : true,// add the year selector
+        dateFormat : "yy-mm-dd",// keep date format as yy-mm-dd
+        maxDate : new Date(),// maximum active date is set to today
+        onSelect : checkDate
         // when date is selected the checkDate method is executed
     });
 
     $('#datepicker2').datepicker({
-        changeMonth: true,// add the month selector
-        changeYear: true,// add the year selector
-        dateFormat: "yy-mm-dd",// keep date format as yy-mm-dd
-        onSelect: function () {
+        changeMonth : true,// add the month selector
+        changeYear : true,// add the year selector
+        dateFormat : "yy-mm-dd",// keep date format as yy-mm-dd
+        onSelect : function() {
             // get selected start date from date picker 1
             var start_date = $('#datepicker').datepicker("getDate");
             // get selected end date from date picker 2
@@ -91,19 +83,21 @@ function checkDate(startDate) {
     $('#datepicker2').datepicker('option', 'disabled', false);
     // set minimum date as start date in date picker 2
     $('#datepicker2').datepicker('option', 'minDate', startDate);
-    var selected_Date = $('#datepicker').datepicker("getDate");
-    var date_3_yr_back = new Date();
-    date_3_yr_back.setFullYear(date_3_yr_back.getFullYear() - 3);
+    var selected_Date=$('#datepicker').datepicker("getDate");
+    var date_3_yr_back=new Date();
+    date_3_yr_back.setFullYear(date_3_yr_back.getFullYear()-3);
 
-    if (selected_Date < date_3_yr_back) {
+    if(selected_Date<date_3_yr_back)
+    {
 
-        var maxDate = new Date();
-        maxDate.setFullYear(selected_Date.getFullYear() + 3);
+        var maxDate=new Date();
+        maxDate.setFullYear(selected_Date.getFullYear()+3);
 
-        $('#datepicker2').datepicker('option', 'maxDate', maxDate);
+        $('#datepicker2').datepicker('option', 'maxDate',maxDate);
     }
-    else {
-        $('#datepicker2').datepicker('option', 'maxDate', new Date());
+    else
+    {
+        $('#datepicker2').datepicker('option', 'maxDate',new Date());
     }
     // set the selected option of the selector to empty
     $("#productList").prop("selectedIndex", 0);
@@ -133,8 +127,8 @@ function diff_months(date1, date2) {
  * this function returns the month name for the given month number
  */
 function GetMonthName(monthNumber) {
-    var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
-        'August', 'September', 'October', 'November', 'December'];
+    var months = [ 'January', 'February', 'March', 'April', 'May', 'June', 'July',
+        'August', 'September', 'October', 'November', 'December' ];
     // resturn the month name for the given month number
     return months[monthNumber];
 }
@@ -152,19 +146,19 @@ function GetMonthName(monthNumber) {
  */
 function drawLineGraph(start_date, end_date, data) {
     // convert date to yy-mm-dd to display in html labels
-    var from = [start_date.getFullYear(),
+    var from = [ start_date.getFullYear(),
         ('0' + (start_date.getMonth() + 1)).slice(-2),
-        ('0' + start_date.getDate()).slice(-2)].join('-');
-    var to = [end_date.getFullYear(),
+        ('0' + start_date.getDate()).slice(-2) ].join('-');
+    var to = [ end_date.getFullYear(),
         ('0' + (end_date.getMonth() + 1)).slice(-2),
-        ('0' + end_date.getDate()).slice(-2)].join('-');
+        ('0' + end_date.getDate()).slice(-2) ].join('-');
     var k = 0;
     // array to store the data set between the selected time period
     var dataSet = [];
     // select data set between selected time period and store it in the array
     // called dataSet
-    for (var i in data) {
-        if (data[i].DateReleasedOn != null && data[i].OverviewProduct != "-"
+    for ( var i in data) {
+        if (data[i].DateReleasedOn != null && data[i].OverviewProduct != ""
             && data[i].DateReleasedOn >= from
             && data[i].DateReleasedOn <= to) {
             dataSet[k++] = data[i];
@@ -178,14 +172,14 @@ function drawLineGraph(start_date, end_date, data) {
     var months_diff = diff_months(start_date, end_date);
     // array to store month numbers of the time period
     var month_number_array = [];
-    var dates = [];
+    var dates=[];
     var date = new Date(start_date);
     // create the array of the month numbers of selected time period
     for (var i = 0; i < months_diff; i++) {
         month_number_array[i] = date.getMonth();
         dates.push({
-            "month_number": date.getMonth(),
-            "year": date.getFullYear()
+            "month_number":date.getMonth(),
+            "year":date.getFullYear()
         });
         date.setDate(1);
         date.setMonth(date.getMonth() + 1);
@@ -196,13 +190,13 @@ function drawLineGraph(start_date, end_date, data) {
     var flag = 0;
     var patch_count = 0;
     // go through the each element in dataSet[]
-    for (var i in dataSet) {
+    for ( var i in dataSet) {
         // assign the i th element to a variable
         var product = dataSet[i];
         // initially flag set to zero
         flag = 0;
         if (checked_product != null) {
-            for (var j in checked_product) {
+            for ( var j in checked_product) {
                 if (checked_product[j].product == product.OverviewProduct) {
                     // flag is updated as 1 if the product name is already in checked product list
                     flag = 1;
@@ -229,7 +223,7 @@ function drawLineGraph(start_date, end_date, data) {
                 // go through the each element in dataSet and get the patch
                 // count by matching the patch release date of the selected
                 // product
-                for (var k in dataSet) {
+                for ( var k in dataSet) {
                     if (product.OverviewProduct == dataSet[k].OverviewProduct
                         && new Date(dataSet[k].DateReleasedOn)
                             .getFullYear() == year
@@ -249,29 +243,31 @@ function drawLineGraph(start_date, end_date, data) {
             }
             // push the product name and the patch counts of the months
             checked_product.push({
-                "product": product.OverviewProduct,
-                "value": value,
+                "product" : product.OverviewProduct,
+                "value" : value,
 
             });
         }
     }
     // create JSON array and bind the data with graph
-    createArray(checked_product, month_number_array, dates);
+    createArray(checked_product, month_number_array,dates);
 }
 /**
  *
  */
-function createArray(result, month_number, dates) {
+function createArray(result, month_number,dates) {
 
     // array to store names of the months of selected time period
     var month_name = [];
     // get month names of the selected time period
-    for (var i in month_number) {
-        var temp_month_name = GetMonthName(month_number[i]);
-        if (temp_month_name.length > 5) {
-            month_name[i] = GetMonthName(month_number[i]).slice(0, 3);
+    for ( var i in month_number) {
+        var temp_month_name=GetMonthName(month_number[i]);
+        if(temp_month_name.length>5)
+        {
+            month_name[i] = GetMonthName(month_number[i]).slice(0,3);
         }
-        else {
+        else
+        {
             month_name[i] = GetMonthName(month_number[i]);
         }
     }
@@ -279,7 +275,7 @@ function createArray(result, month_number, dates) {
     // patch count of the selected time period
     var data = [];
     // for each product, calculate the total patch count
-    for (var i in result) {
+    for ( var i in result) {
         var tot_patches = 0;
         for (j = 0; j < result[i].value.length; j++) {
             tot_patches += result[i].value[j];
@@ -287,15 +283,15 @@ function createArray(result, month_number, dates) {
         // push the product name , patch counts of months and the total patch
         // count of the product for selected time period
         data.push({
-            "label": result[i].product,
-            "values": result[i].value,
-            "tot_patches": tot_patches
+            "label" : result[i].product,
+            "values" : result[i].value,
+            "tot_patches" : tot_patches
         });
     }
     //array to store products which are in top ten patch count list
     var top_ten_patch_list = [];
     //sort the array in descending order of the total patch count
-    data.sort(function (a, b) {
+    data.sort(function(a, b) {
         return b.tot_patches - a.tot_patches
     });
     //select the ten product with highest patch count
@@ -320,7 +316,7 @@ function createArray(result, month_number, dates) {
     $("#productList").html(options.join(''));
     $("#productList").prop("selectedIndex", 0);
     //when select an option from the drop down list get the relevant result set from the data array
-    $("#productList").change(function () {
+    $("#productList").change(function() {
         var selection = $(":selected", this).text();
 
         var res = [];
@@ -336,7 +332,7 @@ function createArray(result, month_number, dates) {
 
         } else {
 
-            for (var i in result) {
+            for ( var i in result) {
                 if (selection == data[i].label) {
                     res.push(data[i]);
                     break;
@@ -366,17 +362,17 @@ function createArray(result, month_number, dates) {
 function bindDatatoGraph(month_name, data) {
 //create array to bind with graph
     var line_graph_data = {
-        xLabel: 'Month',//label of x axis
-        yLabel: 'Patch Count',//label of y axis
-        points: month_name,//month names as the points of x axis
-        groups: data //product and patch counts to draw the lines
+        xLabel : 'Month',//label of x axis
+        yLabel : 'Patch Count',//label of y axis
+        points : month_name,//month names as the points of x axis
+        groups : data //product and patch counts to draw the lines
     };
 //create the graph for the above data
     $('#line-graph').graphly({
-        'data': line_graph_data,
-        'type': 'line',//type of the graph
-        'width': 1000,//width of the graph
-        'height': 500  //height of the graph
+        'data' : line_graph_data,
+        'type' : 'line',//type of the graph
+        'width' : 1000,//width of the graph
+        'height' : 500  //height of the graph
     });
 
 }
@@ -387,11 +383,11 @@ function drawTable(dates, res) {
     // clear the table
     $("#rows tr").remove();
     $("#first_row tr").show();
-    for (var i in dates) {
-        var month_column = dates[i].year + " " + GetMonthName(dates[i].month_number)
+    for ( var i in dates) {
+        var month_column=dates[i].year+" "+GetMonthName(dates[i].month_number)
         table_data.push({
-            "month": month_column,
-            "patch_count": res[0].values[i]
+            "month" : month_column,
+            "patch_count" : res[0].values[i]
         });
     }
 
@@ -404,3 +400,4 @@ function drawTable(dates, res) {
     }
 
 }
+

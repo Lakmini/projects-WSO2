@@ -13,23 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-$.post("/portal/controllers/apis/release-calendar-gadget/releasecalendar.jag", {action: "GET"}, function (datax) {
-    //Get the data from hosted jaggery files and parse it to JSON format
+$.post("/portal/controllers/apis/release-calendar/releasecalendar.jag", function (datax) {
+    // Get the data from hosted jaggery files and parse it
     var data = JSON.parse(datax);
+    //remove the "-GA" tag from version name.
+    for (var i in data) {
+        data[i].version_name = data[i].version_name.replace("- GA", ' ')
+            .replace("-GA", " ");
+    }
     // sort the array as delayed versions first and then the upcoming versions
     data.sort(function (a, b) {
         return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
     });
-
+    //draw the calendar for GA-versions only
+    drawCalendar(data);
+});
+/**
+ *
+ * @param data- array of product details
+ * this function draws the calendar for given data set
+ */
+function drawCalendar(data) {
     var result = [];
     var future_result = [];
     var updated_result = [];
     var today = new Date();
-    for (var i in data) {
 
+    for (var i in data) {
         var item = data[i];
-        //remove the "-GA" tag from version name.
-        var version = item.version_name.replace("- GA", ' ').replace("-GA", " ");
         /**
          * check the products which has expired due_date
          * and push their details in to the result array.
@@ -41,38 +52,37 @@ $.post("/portal/controllers/apis/release-calendar-gadget/releasecalendar.jag", {
         if (new Date(item.due_date).getTime() < new Date(today).getTime()) {
             result.push({
                 "name": item.Project_Name,
-                "desc": version,
+                "desc": item.version_name,
                 "values": [{
-                    "from": "/Date(" + new Date(item.due_date).getTime() + ")/",
+                    "from": "/Date(" + new Date(item.due_date).getTime()
+                    + ")/",
                     "to": "/Date(" + today.getTime() + ")/",
                     "lable": "Not Updated",
                     "customClass": "ganttRed"
                 }]
             });
-        }
-
-        else {
+        } else {
             /**
              * If there are no updates of due_dates(which means item.old_due_dates[] is empty),
              * that products are considered as future releases
              * and put them in to future_result array.
              */
+
             if (item.old_due_dates.length === 0) {
 
                 future_result.push({
                     "name": item.Project_Name,
-                    "desc": version,
+                    "desc": item.version_name,
                     "values": [{
-                        "from": "/Date(" + new Date(item.due_date).getTime() + ")/",
-                        "to": "/Date(" + new Date(item.due_date).getTime() + ")/",
-                        "lable": "Updated",
+                        "from": "/Date(" + new Date(item.due_date).getTime()
+                        + ")/",
+                        "to": "/Date(" + new Date(item.due_date).getTime()
+                        + ")/",
+                        "lable": " ",
                         "customClass": "ganttGreen"
                     }]
                 });
-            }
-
-
-            else {
+            } else {
                 /**
                  * If there are  updates of due_dates(which means item.old_due_dates[] is not empty),
                  * that products are considered as updated releases
@@ -104,7 +114,7 @@ $.post("/portal/controllers/apis/release-calendar-gadget/releasecalendar.jag", {
                      * draw a green dot for new date
                      */
                     if (flag == 1) {
-
+                        //window.alert( item.Project_Name);
                         if (dates[l] > dates[l + 1]) {
                             values.push(
                                 {
@@ -118,7 +128,7 @@ $.post("/portal/controllers/apis/release-calendar-gadget/releasecalendar.jag", {
                                 });
                         }
                         else {
-
+                            //else draw the normal release lag
                             values.push(
                                 {
                                     "from": "/Date("
@@ -142,7 +152,7 @@ $.post("/portal/controllers/apis/release-calendar-gadget/releasecalendar.jag", {
 
                     }
                     else {
-                        //else draw the normal release lag
+                        //draw the green dot for new date
                         values.push(
                             {
                                 "from": "/Date("
@@ -166,50 +176,56 @@ $.post("/portal/controllers/apis/release-calendar-gadget/releasecalendar.jag", {
 
 
                 }
-                //draw the green dot for new date
+
                 values.push({
-                        "from": "/Date(" + new Date(dates[dates.length - 1]).getTime() + ")/",
-                        "to": "/Date(" + new Date(dates[dates.length - 1]).getTime() + ")/",
-                        "lable": "Updated",
-                        "customClass": "ganttGreen"
-                    }
-                );
+                    "from": "/Date("
+                    + new Date(dates[dates.length - 1]).getTime()
+                    + ")/",
+                    "to": "/Date("
+                    + new Date(dates[dates.length - 1]).getTime()
+                    + ")/",
+                    "lable": " ",
+                    "customClass": "ganttGreen"
+                });
+
 
                 updated_result.push({
                     "name": item.Project_Name,
-                    "desc": version,
+                    "desc": item.version_name,
+
                     "values": values
+
                 });
 
             }
 
         }
+
     }
     /**
      * concat result,future_result and the updated_result arrays
-     * in to one array called overall_result
+     * in to one array called final_result
      */
-    var overall_result = result.concat(updated_result);
-    overall_result = overall_result.concat(future_result);
-    getdata(overall_result);
+    var final_result = result.concat(updated_result);
+    final_result = final_result.concat(future_result);
+    getdata(final_result);
 
-});
+}
 /**
  * @desc display the release calendar
  * @param result-the data array to be bind with the UI
  */
-function getdata(result) {
+
+function getdata(res) {
     $(".gantt").gantt({
-        source: result,
+        source: res,
         navigate: "scroll",
         scale: "weeks",
-        minScale: "months",
-        maxScale: "months",
-        itemsPerPage: 16,
+        itemsPerPage: 100,
         onRender: function () {
 
             if (window.console && typeof console.log === "function") {
-                console.log("chart successfully  rendered");
+                console.log("chart rendered");
             }
         }
     });

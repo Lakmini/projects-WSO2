@@ -28,11 +28,13 @@ $.post("/portal/controllers/apis/patching-trend-table/table.jag", {
         }
         //set the start date of the time preiod to 365 days back from current date
         var begin = new Date();
-        begin.setDate(begin.getDate() - 100);
+        begin.setDate(begin.getDate() - 365);
         //draw the table to initial time period
         drawTable(begin, new Date(), data);
         //draw the table to selected time periods
         selectAndDraw(data);
+        $('#datepicker').datepicker('setDate', new Date(begin));
+        $('#datepicker2').datepicker('setDate', new Date());
     });
 
 function selectAndDraw(data) {
@@ -56,7 +58,7 @@ function selectAndDraw(data) {
             // get selected start date from date picker 2
             var end_date = $('#datepicker2').datepicker("getDate");
             //clear the table
-            $(".datatable tr").remove();
+            $("#rows tr").remove();
             //draw the new table for selected time range
             drawTable(start_date, end_date, data);
             //disable the date picker 2
@@ -96,8 +98,6 @@ function drawTable(start_date, end_date, data) {
     var to = [end_date.getFullYear(),
         ('0' + (end_date.getMonth() + 1)).slice(-2),
         ('0' + end_date.getDate()).slice(-2)].join('-');
-    $("label[for='from']").html(from);
-    $("label[for='to']").html(to);
 
     var k = 0;
     // array to store the data set between the selected time period
@@ -155,15 +155,16 @@ function buildTable(result) {
     result.sort(function (a, b) {
         return b.patches - a.patches
     });
-    //bind the data with the table
-    $(".datatable")
-        .append(
-            "<tr><th  > Product Name</th> <th > Patch Count </th> </tr>");
+    //bind the data with the table  
     for (var i = 0; i < result.length; i++) {
-        $(".datatable").append(
+        $("#rows").append(
             "<tr><td>" + result[i].product + "</td><td>"
             + result[i].patches + "</td></tr>");
+        $("#myTable").trigger("update");
 
     }
 
+
 }
+
+

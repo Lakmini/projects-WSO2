@@ -14,7 +14,8 @@
  ~ See the License for the specific language governing permissions and
  ~ limitations under the License.
  */
-//make the db connection through the UniDash_DS datasource
+
+//make the db connection through the  datasource
 var db = new Database("UnifiedDashboards");
 function getRecords() {
     //get the data set with maximun timestamp
@@ -48,12 +49,12 @@ function getRecords() {
         }
 
     }
-    db.close();
     print(sorted_data);
     return sorted_data;
 }
 
 getRecords();
-
+db.close();
 %>
+
 

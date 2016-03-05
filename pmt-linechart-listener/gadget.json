@@ -1,0 +1,15 @@
+{
+  "id": "pmt-linechart-listener",
+  "title": "Patch Count Vs Month Per Product-2",
+  "type": "gadget",
+  "thumbnail": "store://gadget/pmt-linechart-listener/index.png",
+  "data": {
+    "url": "store://gadget/pmt-linechart-listener/index.xml"
+  },
+  "listen": {
+    "listener": {
+      "type": "address",
+      "description": "Used to filter based on state"
+    }
+  }
+}

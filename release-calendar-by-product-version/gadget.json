@@ -1,0 +1,15 @@
+{
+  "id": "test",
+  "title": "WSO2 Release Calendar-by-product-version",
+  "type": "gadget",
+  "thumbnail": "store://gadget/release-calendar-by-product-version/index.png",
+  "data": {
+    "url": "store://gadget/release-calendar-by-product-version/index.xml"
+  },
+  "listen": {
+    "listener": {
+      "type": "address",
+      "description": "Used to filter based on state"
+    }
+  }
+}

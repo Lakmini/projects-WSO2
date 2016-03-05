@@ -21,67 +21,111 @@ $.post("/portal/controllers/apis/product-selector/product-selector.jag", {
     data = JSON.parse(datax);
     //array to store options of the selector
     var options = [];
+	 options
+            .push('<option value="', 0, '">', "select-product",
+                '</option>');
     //assign product names as the options of the selector
     for (var i = 0; i < data.length; i++) {
         options
-            .push('<option value="', i, '">', data[i].PRODUCT_NAME,
+            .push('<option value="', i+1, '">', data[i].PRODUCT_NAME,
                 '</option>');
     }
+
     //join the option array with the selector
     $("#productList").html(options.join(''));
     //set initial selected option
     $("#productList").prop("selectedIndex", 0);
-    //when selector get changed
-    $("#productList").change(function () {
-        // get selected option of the selector
-        var selection = $(":selected", this).text();
-        //array to store product mapping names of each system.(currently we have Redmine,PMT,Jenkins)
-        var product_mapping_names = [];
-        //find the mapping names for the selected product from 3 systems
-        for (var i in data) {
-            if (selection == data[i].PRODUCT_NAME) {
-                product_mapping_names.push({
-                    //product name in REDMINE
-                    "redmine_name": data[i].REDMINE,
-                    // product name in PMT
-                    "PMT_name": data[i].PMT,
-                    //product name in JENKINS
-                    "Jenkins_name": data[i].JENKINS
-                });
-                break;
-            }
-        }
-        //publish the product_mapping_names to the subscribers
-        gadgets.Hub.publish('select', {
-            msg: product_mapping_names
-        });
-
-
-    });
+    datePickerController();
+    
 
 });
-//publish the selected option when dashboard is loading
-gadgets.HubSettings.onConnect = function () {
-    var selected_option = $("#productList option:selected").text();
+
+/**
+ * this function set the date picker configurations
+ */
+function datePickerController() {
+    // date picker to select begin date of the time period
+    $('#datepicker_from').datepicker({
+        changeMonth: true,// add the month selector
+        changeYear: true,// add the year selector
+        dateFormat: "yy-mm-dd",// keep date format as yy-mm-dd
+        maxDate: new Date(),// maximum active date is set to today
+        onSelect: function () {
+            //get selected date of this date picker
+            var selected_date = $('#datepicker_from').datepicker("getDate");
+            //calculate the date 3 years back from current date
+            var date_3yrs_back = new Date();
+            date_3yrs_back.setFullYear(date_3yrs_back.getFullYear() - 3);
+            /**
+             * if start date is older than the date which is 3 yr back from current date,
+             * then limit the max date of date picker 2 .
+             * (this is done bcz when the time range is larger than 3 years then the graphs are not clear)
+             */
+            if (selected_date < date_3yrs_back) {
+
+                var maxDate = new Date();
+                maxDate.setFullYear(selected_date.getFullYear() + 3);
+
+                $('#datepicker_to').datepicker('option', 'maxDate', maxDate);
+            }
+            else {
+                $('#datepicker_to').datepicker('option', 'maxDate', new Date());
+            }
+
+        }
+
+    });
+    $('#datepicker_to').datepicker({
+        changeMonth: true,// add the month selector
+        changeYear: true,// add the year selector
+        dateFormat: "yy-mm-dd",// keep date format as yy-mm-dd
+        maxDate: new Date()// maximum active date is set to today
+    });
+    //end date of the selected time period
+    var end_date = new Date();
+    //get date one year back from today
+    var today = new Date();
+    today.setDate(today.getDate() - 365);
+    //set start date as one year back from current date
+    var start_date = today;
+    //set initial time perion on date pickers
+    $('#datepicker_from').datepicker('setDate', start_date);
+    $('#datepicker_to').datepicker('setDate', end_date);
+}
+/**
+ * this function is used to publish the data to subscribers
+ * when the button is clicked
+ */
+function buttonClick() {
+	 // get selected option of the selector
+    var selection = $("#productList option:selected").text();
+    //get dates from date pickers
+    var start_date = $('#datepicker_from').datepicker("getDate");
+    var end_date = $('#datepicker_to').datepicker("getDate");
+     //array to store product mapping names of each system.(currently we have Redmine,PMT,Jenkins)
     var product_mapping_names = [];
-    //find the mapping names for the selected product from 3 systems
+
+     //find the mapping names for the selected product from 3 systems
     for (var i in data) {
-        if (selected_option == data[i].PRODUCT_NAME) {
+        if (selection == data[i].PRODUCT_NAME) {
             product_mapping_names.push({
+		       "product_name":data[i].PRODUCT_NAME,
                 //product name in REDMINE
                 "redmine_name": data[i].REDMINE,
                 // product name in PMT
                 "PMT_name": data[i].PMT,
-                //product name in JENKINS
-                "Jenkins_name": data[i].JENKINS
+                //product name in JENKINSstart_date
+                "Jenkins_name": data[i].JENKINS,
+                "start_date":start_date,
+                "end_date":end_date
             });
             break;
         }
     }
-    setTimeout(function () {
-        gadgets.Hub.publish('select', {
-            msg: product_mapping_names
+    //publish the dates object to subscribers
+    gadgets.Hub.publish('data-publisher', {
+        msg: product_mapping_names
+    });
 
-        });
-    }, 200);
 }
+

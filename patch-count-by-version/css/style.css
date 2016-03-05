@@ -15,7 +15,7 @@ label {
     width: 500px;
 }
 
-.datatable{
+.datatable {
     border-collapse: collapse;
     width: 100%;
 }
@@ -36,6 +36,5 @@ label {
 }
 
 .headerSortUp {
-    background: url(../img/bg.gif)
-    no-repeat 99%;
+    background: url(../img/bg.gif) no-repeat 99%;
 }

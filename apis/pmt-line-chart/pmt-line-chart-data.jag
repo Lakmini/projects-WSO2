@@ -15,7 +15,7 @@
  ~ limitations under the License.
  */
 
-//make the db connection through the UniDash_DS datasource
+//make the db connection through the  datasource
 var db = new Database("UnifiedDashboards");
 function getRecords() {
     //select the result set with maximum timestamp
@@ -48,11 +48,31 @@ function getRecords() {
         }
     }
 
+    var query_product_mapping_data = "SELECT PRODUCT_NAME,PMT FROM PRODUCT_MAPPING WHERE PMT!=''";
+    var product_mapping_name = db.query(query_product_mapping_data);
+    var flag;
+    for (var i in formated_result) {
+        flag = 0;
+        for (var j in product_mapping_name) {
+
+            if (formated_result[i].OverviewProduct.indexOf(product_mapping_name[j].PMT) != -1) {
+
+                formated_result[i].OverviewProduct = product_mapping_name[j].PRODUCT_NAME;
+                flag = 1;
+                break;
+            }
+        }
+        if (flag != 1) {
+            formated_result[i].OverviewProduct = "";
+        }
+    }
+
     print(formated_result);
     return formated_result;
 }
 
 getRecords();
-
+db.close();
 %>
+
 
