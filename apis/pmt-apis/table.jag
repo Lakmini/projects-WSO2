@@ -1,0 +1,105 @@
+<%
+include("constant.jag");
+//make the db connection through the UniDash_DS datasource
+var db = db_connection;
+function getRecords() {
+    //select the data set with maximum timestamp
+    var result = db.query("SELECT t.id,t.OverviewName,t.DateReleasedOn,t.OverviewProduct,t._timestamp,t.OverviewCarbonPlatform  FROM (SELECT id,MAX(_timestamp) as time from PMTData group by id) as maxTable inner join PMTData as t on t.id=maxTable.id and t._timestamp=maxTable.time;");
+
+    var query_product_mapping_data="SELECT PRODUCT_NAME,PMT FROM PRODUCT_MAPPING WHERE PMT!=''";
+    var product_mapping_data=db.query(query_product_mapping_data);
+
+    var formated_result = [];
+
+    for (var i in result) {
+   // var pmt_product_data=[];
+        // remove the "All product" and rename with "Kernel"
+        if (result[i].OverviewProduct.indexOf("All") != -1) {
+            result[i].OverviewProduct = "Kernel";
+        }
+        //when one patch belong to more than one product , seperate them as different result sets
+        if (result[i].OverviewProduct.indexOf(",") != -1) {
+            var products = result[i].OverviewProduct.split(",");
+            for (var j in products) {
+               var pmt_product_data=getProductMappingName(product_mapping_data,products[j]);
+               if(pmt_product_data.length!=0)
+               {
+                formated_result.push({
+                    "OverviewName": result[i].OverviewName,
+                    "DateReleasedOn": result[i].DateReleasedOn,
+                    "product": pmt_product_data[0].mapping_name ,
+                    "platform": result[i].OverviewCarbonPlatform,
+                    "version":getVersionNumber(products[j],pmt_product_data[0].pmt_name)
+                }); 
+               }
+                
+            }
+        }
+        else {
+        var pmt_product_data=getProductMappingName(product_mapping_data,result[i].OverviewProduct);
+        if(pmt_product_data.length!=0)
+        {
+         formated_result.push({
+                "OverviewName": result[i].OverviewName,
+                "DateReleasedOn": result[i].DateReleasedOn,
+                "product":pmt_product_data[0].mapping_name ,
+                "platform": result[i].OverviewCarbonPlatform,
+                "version":getVersionNumber(result[i].OverviewProduct,pmt_product_data[0].pmt_name)
+            });
+        }
+           
+        }
+       
+    }
+   
+    
+    print(formated_result);
+    return result;
+}
+function getProductMappingName(product_mapping_data,pmt_name){
+
+    var product_mapping_name=[];
+             
+        for(var j in product_mapping_data)
+        {
+                   
+               if(pmt_name.indexOf(product_mapping_data[j].PMT)!=-1)
+               {
+                 
+                     product_mapping_name.push({
+                     "mapping_name":product_mapping_data[j].PRODUCT_NAME,
+                     "pmt_name":product_mapping_data[j].PMT
+                     });
+                     
+                    
+                    break;
+               }
+        }
+       
+    return product_mapping_name;
+    
+
+}
+
+function getVersionNumber(pmt_name,pmt_mapping_name)
+{
+
+    // get the version number by compare with the regex pattern
+        var version = pmt_name.match(/(?!\.)(\d+(\.\d+)+)(?![\d\.])/g);
+
+      if(version!=null)
+      {
+            return version[0];
+      }
+      else
+      {
+         return "";
+      }
+       
+}
+
+getRecords();
+
+%>
+
+

@@ -1,0 +1,67 @@
+<%
+include("constant.jag");
+//make the db connection through the UniDash_DS datasource
+var db = db_connection;
+function getRecords() {
+    //select the result set with maximum timestamp
+    var result = db.query("SELECT t.id,t.OverviewName,t.DateReleasedOn,t.OverviewProduct,t._timestamp  FROM (SELECT id,MAX(_timestamp) as time from PMTData group by id) as maxTable inner join PMTData as t on t.id=maxTable.id and t._timestamp=maxTable.time;");
+    //array to store formated data
+    var formated_result = [];
+    //for each product in result set
+    for (var i in result) {
+        // the products which have the product name as "All product", rename as "Kernel"
+        if (result[i].OverviewProduct.indexOf("All") != -1) {
+            result[i].OverviewProduct = "Kernel";
+        }
+        //when more than one product name for one patch,seperate them as different products
+        if (result[i].OverviewProduct.indexOf(",") != -1) {
+            var products = result[i].OverviewProduct.split(",");
+            for (var j in products) {
+                formated_result.push({
+                    "OverviewName": result[i].OverviewName,
+                    "DateReleasedOn": result[i].DateReleasedOn,
+                    "OverviewProduct": products[j]
+                });
+            }
+        }
+        else {
+            formated_result.push({
+                "OverviewName": result[i].OverviewName,
+                "DateReleasedOn": result[i].DateReleasedOn,
+                "OverviewProduct": result[i].OverviewProduct
+            });
+        }
+    }
+ 
+    var query_product_mapping_data="SELECT PRODUCT_NAME,PMT FROM PRODUCT_MAPPING WHERE PMT!=''";
+    var product_mapping_name=db.query(query_product_mapping_data);
+    var flag;
+    for(var i in formated_result)
+    {
+             flag=0;
+    	for(var j in product_mapping_name)
+    	{
+    				
+    	       if(formated_result[i].OverviewProduct.indexOf(product_mapping_name[j].PMT)!=-1)
+    	       {
+    	         
+    	       		formated_result[i].OverviewProduct=product_mapping_name[j].PRODUCT_NAME;
+    	       		flag=1;
+    	       		break;
+    	       }
+    	}
+    	if(flag!=1)
+    	{
+    		formated_result[i].OverviewProduct="";
+    	}
+    }
+
+   print(formated_result);
+    return formated_result;
+}
+
+getRecords();
+
+%>
+
+

@@ -18,16 +18,15 @@
 //make the db connection through the  datasource
 var db = new Database("jdbc:mysql://localhost:3306/UnifiedDashboards", "root", "");
 
-function getRecords() {
-    //db query to get all the mapping data
-    var query_project_list = "SELECT * FROM PRODUCT_MAPPING ORDER BY PRODUCT_NAME ASC;";
-    var product_list = db.query(query_project_list);
-    print(product_list);
+function getFirstProduct() {
+    //db query to get first product from mapping table
+    var query_first_product = "SELECT * FROM PRODUCT_MAPPING ORDER BY PRODUCT_NAME ASC LIMIT 1;";
+    var first_product = db.query(query_first_product);     
+    print(first_product);
     db.close();
-    return product_list;
+    return first_product;
 }
-getRecords();
+getFirstProduct();
 
 %>
-
 

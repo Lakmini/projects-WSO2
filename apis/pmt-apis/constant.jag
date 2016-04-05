@@ -1,0 +1,4 @@
+<%
+var db_connection = new Database("jdbc:mysql://localhost:3306/UnifiedDashboards?zeroDateTimeBehavior=convertToNull", "root", "");
+//var db_connection=new Database("UnifiedDashboards");
+%>
