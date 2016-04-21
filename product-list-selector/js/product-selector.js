@@ -19,15 +19,16 @@ $.post("/portal/controllers/apis/product-selector/product-selector.jag", {
 }, function (datax) {
     // Get the data from hosted Jaggery files and parse it
     data = JSON.parse(datax);
-    //array to store options of the selector
+    /*
+     format of the data is as follows,
+     [{PRODUCT_ID:XX,PRODUCT_NAME:XXXXX,REDMINE:XXXXX,PMT:XXXX,JENKINS:XXXX,jira:xxx,gitHub:xxxx},.....]
+     */
+    //array to store product names of the selector
     var options = [];
-	 options
-            .push('<option value="', 0, '">', "select-product",
-                '</option>');
     //assign product names as the options of the selector
     for (var i = 0; i < data.length; i++) {
         options
-            .push('<option value="', i+1, '">', data[i].PRODUCT_NAME,
+            .push('<option value="', i, '">', data[i].PRODUCT_NAME,
                 '</option>');
     }
 
@@ -36,9 +37,24 @@ $.post("/portal/controllers/apis/product-selector/product-selector.jag", {
     //set initial selected option
     $("#productList").prop("selectedIndex", 0);
     datePickerController();
-    
+    //get the first selected product
+    var selection = $("#productList option:selected").text();
+    //append the product logo of first product
+    appendLogo(selection);
+    //draw the graph when select a product name from selector for time period selected in date pickers.
+    changeOnSelector();
+
 
 });
+
+/**
+ * this function publish messages when select a product name from selector
+ */
+function changeOnSelector() {
+    $("#productList").change(function () {
+        buttonClick();
+    });
+}
 
 /**
  * this function set the date picker configurations
@@ -97,27 +113,29 @@ function datePickerController() {
  * when the button is clicked
  */
 function buttonClick() {
-	 // get selected option of the selector
+    // get selected option of the selector
     var selection = $("#productList option:selected").text();
+    appendLogo(selection);
     //get dates from date pickers
     var start_date = $('#datepicker_from').datepicker("getDate");
     var end_date = $('#datepicker_to').datepicker("getDate");
-     //array to store product mapping names of each system.(currently we have Redmine,PMT,Jenkins)
+    //array to store product mapping names of each system.(currently we have Redmine,PMT,Jenkins)
     var product_mapping_names = [];
 
-     //find the mapping names for the selected product from 3 systems
+    //find the mapping names for the selected product from 5 systems
     for (var i in data) {
         if (selection == data[i].PRODUCT_NAME) {
             product_mapping_names.push({
-		       "product_name":data[i].PRODUCT_NAME,
+                "product_name": data[i].PRODUCT_NAME,
                 //product name in REDMINE
                 "redmine_name": data[i].REDMINE,
                 // product name in PMT
                 "PMT_name": data[i].PMT,
                 //product name in JENKINSstart_date
                 "Jenkins_name": data[i].JENKINS,
-                "start_date":start_date,
-                "end_date":end_date
+                "JIRA_name":data[i].Jira,
+                "start_date": start_date,
+                "end_date": end_date
             });
             break;
         }
@@ -126,6 +144,84 @@ function buttonClick() {
     gadgets.Hub.publish('data-publisher', {
         msg: product_mapping_names
     });
+
+}
+/**
+ *
+ * @param name - name of the selected product
+ * this function used to append the logo for selected product name
+ */
+function appendLogo(name) {
+
+    $('#logo').empty();
+    switch (name) {
+        case "API Manager":
+            $('#logo').append('<img  id="logoimg" src="/portal/store/carbon.super/gadget/product-list-selector/img/apim-logo.png"/>');
+            break;
+        case "Enterprise Service Bus":
+            $('#logo').append('<img  id="logoimg" src="/portal/store/carbon.super/gadget/product-list-selector/img/esb-logo.png"/>');
+            break;
+        case "App Factory":
+            $('#logo').append('<img  id="logoimg" src="/portal/store/carbon.super/gadget/product-list-selector/img/af-logo.png"/>');
+            break;
+        case "App Manager":
+            $('#logo').append('<img  id="logoimg" src="/portal/store/carbon.super/gadget/product-list-selector/img/appm-logo.png"/>');
+            break;
+        case "Application Server":
+            $('#logo').append('<img  id="logoimg" src="/portal/store/carbon.super/gadget/product-list-selector/img/as-logo.png"/>');
+            break;
+        case "Business Activity Monitor":
+            $('#logo').append('<img  id="logoimg" src="/portal/store/carbon.super/gadget/product-list-selector/img/bam-logo.png"/>');
+            break;
+        case "Business Process Server":
+            $('#logo').append('<img  id="logoimg" src="/portal/store/carbon.super/gadget/product-list-selector/img/bps-logo.gif"/>');
+            break;
+        case "Business Rules Server":
+            $('#logo').append('<img  id="logoimg" src="/portal/store/carbon.super/gadget/product-list-selector/img/brs-logo.png"/>');
+            break;
+        case "Complex Event Processor":
+            $('#logo').append('<img  id="logoimg" src="/portal/store/carbon.super/gadget/product-list-selector/img/cep-logo.png"/>');
+            break;
+        case "Data Analytics Server":
+            $('#logo').append('<img  id="logoimg" src="/portal/store/carbon.super/gadget/product-list-selector/img/das-logo.png"/>');
+            break;
+        case "Data Services Server":
+            $('#logo').append('<img  id="logoimg" src="/portal/store/carbon.super/gadget/product-list-selector/img/dss-logo.png"/>');
+            break;
+        case "Elastic Load Balancer":
+            $('#logo').append('<img  id="logoimg" src="/portal/store/carbon.super/gadget/product-list-selector/img/elb-logo.png"/>');
+            break;
+        case "Enterprise Mobility Manager":
+            $('#logo').append('<img  id="logoimg" src="/portal/store/carbon.super/gadget/product-list-selector/img/emm-logo.png"/>');
+            break;
+        case "Enterprise Store":
+            $('#logo').append('<img  id="logoimg" src="/portal/store/carbon.super/gadget/product-list-selector/img/es-logo.png"/>');
+            break;
+        case "Governance Registry":
+            $('#logo').append('<img  id="logoimg" src="/portal/store/carbon.super/gadget/product-list-selector/img/greg-logo.png"/>');
+            break;
+        case "Identity Server":
+            $('#logo').append('<img  id="logoimg" src="/portal/store/carbon.super/gadget/product-list-selector/img/is-logo.png"/>');
+            break;
+        case "Message Broker":
+            $('#logo').append('<img  id="logoimg" src="/portal/store/carbon.super/gadget/product-list-selector/img/mb-logo.png"/>');
+            break;
+        case "Machine Learner":
+            $('#logo').append('<img  id="logoimg" src="/portal/store/carbon.super/gadget/product-list-selector/img/ml-logo.png"/>');
+            break;
+        case "Private PaaS":
+            $('#logo').append('<img  id="logoimg" src="/portal/store/carbon.super/gadget/product-list-selector/img/ppas-logo.png"/>');
+            break;
+        case "Storage Server":
+            $('#logo').append('<img  id="logoimg" src="/portal/store/carbon.super/gadget/product-list-selector/img/ss-logo.png"/>');
+            break;
+        case "User Engagement Server":
+            $('#logo').append('<img  id="logoimg" src="/portal/store/carbon.super/gadget/product-list-selector/img/ues-logo.png"/>');
+            break;
+        case "Developer Studio":
+            $('#logo').append('<img  id="logoimg" src="/portal/store/carbon.super/gadget/product-list-selector/img/ues-logo.png"/>');
+            break;
+    }
 
 }
 

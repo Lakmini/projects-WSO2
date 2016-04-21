@@ -14,42 +14,48 @@
  ~ See the License for the specific language governing permissions and
  ~ limitations under the License.
  */
-var db = new Database("jdbc:mysql://localhost:3306/UnifiedDashboards", "root", "");
-var name =request.getParameter("name");
-var startDate=request.getParameter("start_date");
-var endDate=request.getParameter("end_date");
+//make db connection through UnifiedDashboards data source
+var db = new Database("UnifiedDashboards");
+//get product name from request parameters
+var name = request.getParameter("name");
+//get start date from request parameters
+var startDate = request.getParameter("start_date");
+//get end date from request parameters
+var endDate = request.getParameter("end_date");
 
+function getData() {
+//selet repository details for the given product.
+//Example for the product APIM repos are product-apim,analytics-apim
+    var githubMappingQuery = "SELECT * FROM GitHubMappingTable WHERE Product='" + name + "';";
+    var gitHubMappingData = db.query(githubMappingQuery);
+    //variable to store repository name inside the for loop
+    var repoName;
+    //array to store sha value,commitdate,committerID,committer name, link for the profile picture
+    var commitsPerProduct = [];
+    //go through each repository of the product
+    for (var i in gitHubMappingData) {
+        //assign repository name
+        repoName = (gitHubMappingData[i].Repo).toString();
+        //select commit details of the products. sha,commitDate,name of the repository
+        var commitDataQuery = "SELECT DISTINCT sha,commitDate,repo FROM githubCommit " +
+                "where repo='" + repoName + "' AND date(commitDate)>'" + startDate + "' AND date(commitDate)<'" + endDate + "';";
+        var commitData = db.query(commitDataQuery);
+        //if commits are available for the selected repository then they are pushed in to commitsPerProduct array
+        if (commitData.length != 0) {
 
-function getData(){
+            for (var i in commitData) {
+                commitsPerProduct.push({
+                    //id of the commit
+                    "sha": commitData[i].sha,
+                    //date of the commit
+                    "commitDate": commitData[i].commitDate
+                });
+            }
+        }
 
-
-var githubMappingQuery="SELECT * FROM GitHubMappingTable WHERE Product='"+name+"';";
-var gitHubMappingData=db.query(githubMappingQuery);
-var repoName;
-var commitsPerProduct=[];
-for(var i in gitHubMappingData){
-
-repoName=(gitHubMappingData[i].Repo).toString();
-var commitDataQuery="SELECT DISTINCT sha,commitDate,repo FROM githubCommit where repo='"+repoName+"' AND date(commitDate)>'"+startDate+"' AND date(commitDate)<'"+endDate+"';";
-var commitData=db.query(commitDataQuery);
-if(commitData.length!=0)
-{
-
-	for(var i in commitData )
-{
-
-	commitsPerProduct.push({
-	"sha":commitData[i].sha,
-	"commitDate":commitData[i].commitDate
-	});
-}
-}
-
-
-
-}
-print(commitsPerProduct);
-
+    }
+    print(commitsPerProduct);
+    return commitsPerProduct;
 
 }
 getData();

@@ -1,0 +1,15 @@
+{
+   "id":"github-top-commiters-leaderboard",
+   "title":"Git Hub Top 10 Commiters",
+   "type":"gadget",
+   "thumbnail":"store://gadget/github-contributor-leaderboard/index.png",
+   "data":{
+      "url":"store://gadget/github-contributor-leaderboard/index.xml"
+   },
+"listen": {
+        "listener": {
+            "type": "address",
+            "description": "Used to filter based on state"
+        }
+    }
+}

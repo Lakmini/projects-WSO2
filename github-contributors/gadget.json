@@ -1,0 +1,16 @@
+{
+   "id":"github-commit-history",
+   "title":"Git Hub Commit History",
+   "type":"gadget",
+   "thumbnail":"store://gadget/github-contributors/index.png",
+   "data":{
+      "url":"store://gadget/github-contributors/index.xml"
+   },
+ "listen": {
+        "listener": {
+            "type": "address",
+            "description": "Used to filter based on state"
+        }
+    }
+}
+

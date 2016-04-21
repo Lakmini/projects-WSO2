@@ -1,0 +1,16 @@
+{
+   "id":"jira-issue-type-chart",
+   "title":"JIRA-ISSUES",
+   "type":"gadget",
+   "thumbnail":"store://gadget/jira-issue-type-chart/index.png",
+   "data":{
+      "url":"store://gadget/jira-issue-type-chart/index.xml"
+   },
+ "listen": {
+        "listener": {
+            "type": "address",
+            "description": "Used to filter based on state"
+        }
+    }
+}
+

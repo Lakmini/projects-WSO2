@@ -1,4 +1,21 @@
 <?xml version="1.0" encoding="UTF-8" ?>
+<!--
+~  Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+~
+~  WSO2 Inc. licenses this file to you under the Apache License,
+~  Version 2.0 (the "License"); you may not use this file except
+~  in compliance with the License.
+~  You may obtain a copy of the License at
+~
+~    http://www.apache.org/licenses/LICENSE-2.0
+~
+~  Unless required by applicable law or agreed to in writing,
+~  software distributed under the License is distributed on an
+~  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+~  KIND, either express or implied.  See the License for the
+~  specific language governing permissions and limitations
+~  under the License.
+-->
 <Module>
     <ModulePrefs title="ListSelector" height="250">
         <Require feature="pubsub-2"/>
@@ -8,31 +25,53 @@
         <![CDATA[
         <head>
            
-             <link rel="stylesheet" href="css/jquery-ui.css" type="text/css">
+            <link rel="stylesheet" href="css/jquery-ui.css" type="text/css">
+            <link rel="stylesheet" href="css/style.css" type="text/css">
             <script language="javascript" type="text/javascript" src="/portal/js/jquery-1.10.2.js"></script>
             <script src="js/jquery-ui.js"></script>
             <script language="javascript" type="text/javascript" src="js/product-selector.js"></script>
             
         <head>
         <body>
-           
-            <select id="productList" ></select>
-             <table>
-                    <tr>
-                        <th>
-                            From: <input type="text" id="datepicker_from">
+            <div>
+                <table >
+                        <tr>
+                            <th align="left">Product:</th>
+                        </tr><tr>
+                            <th align="left">
+                          <select id="productList" ></select>
+                          </th>
+                        </tr>
+                        <tr>
+                            <th align="left">
+                           <p> From:</p>
                         </th>
-                        <th>
-                            To: <input type="text" id="datepicker_to">
+                        </tr>
+                         <tr>
+                            <th align="left">
+                           <p>  <input type="text" id="datepicker_from"></p>
                         </th>
-                        
-                    </tr>
+                        </tr>
+
+                        <tr>
+                            <th align="left">
+                            <p>To: </p>
+                        </th>
+                        </tr>
+                        <tr>
+                            <th align="left">
+                            <p><input type="text" id="datepicker_to"></p>
+                        </th>
+                        </tr>
+                        <tr>
+                            <th align="left">
+                             <button id="button" onclick="buttonClick()">Refresh</button>
+                         </th>
+                        </tr>
+
                 </table>
-        
-                             <button  onclick="buttonClick()">Draw</button>
-                        
-            
-            
+            </div>
+
         </body>
         ]]>
     </Content>

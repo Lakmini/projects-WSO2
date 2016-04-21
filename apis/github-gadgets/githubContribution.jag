@@ -14,45 +14,58 @@
  ~ See the License for the specific language governing permissions and
  ~ limitations under the License.
  */
-var db = new Database("jdbc:mysql://localhost:3306/UnifiedDashboards", "root", "");
-var name =request.getParameter("name");
-var startDate=request.getParameter("start_date");
-var endDate=request.getParameter("end_date");
+//make db connection with UnifiedDashboards data source
+var db = new Database("UnifiedDashboards");
+//get request parameter "name" (product name)
+var name = request.getParameter("name");
+//get start date from request parameters
+var startDate = request.getParameter("start_date");
+//get end date from request parameter
+var endDate = request.getParameter("end_date");
+/*
+ this function returns commits data for requested product
+ */
+function getData() {
+//selet repository details for the given product.
+//Example for the product APIM repos are product-apim,analytics-apim
+    var githubMappingQuery = "SELECT * FROM GitHubMappingTable WHERE Product='" + name + "';";
+    var gitHubMappingData = db.query(githubMappingQuery);
+    //variable to store repository name inside the for loop
+    var repoName;
+    //array to store sha value,commitdate,committerID,committer name, link for the profile picture
+    var commitsPerProduct = [];
+    //go through each repository of the product
+    for (var i in gitHubMappingData) {
+        //assign repository name
+        repoName = (gitHubMappingData[i].Repo).toString();
+        //select commit details of the products. sha,commitDate,committerID,committer name
+        var commitDataQuery = "SELECT DISTINCT sha,commitDate,githubCommit.repo,committerID,userName,profilePicLink" +
+                " FROM githubCommit,githubContributor where githubCommit.repo='" + repoName + "' AND committerID!='' " +
+                "AND date(commitDate)>'" + startDate + "' AND date(commitDate)<'" + endDate + "' AND committerID=id;";
+        var commitData = db.query(commitDataQuery);
+        //if commits are available for the selected repository then they are pushed in to commitData array
+        if (commitData.length != 0) {
 
+            for (var i in commitData) {
 
-function getData(){
+                commitsPerProduct.push({
+                    //commit ID
+                    "sha": commitData[i].sha,
+                    //Date of the commit
+                    "commitDate": commitData[i].commitDate,
+                    //ID of the committer
+                    "committerID": commitData[i].committerID,
+                    //name of the committer
+                    "name": commitData[i].userName,
+                    //profile picture link of the committer
+                    "profilePicLink": commitData[i].profilePicLink
+                });
+            }
+        }
 
-
-var githubMappingQuery="SELECT * FROM GitHubMappingTable WHERE Product='"+name+"';";
-var gitHubMappingData=db.query(githubMappingQuery);
-var repoName;
-var commitsPerProduct=[];
-for(var i in gitHubMappingData){
-
-repoName=(gitHubMappingData[i].Repo).toString();
-var commitDataQuery="SELECT DISTINCT sha,commitDate,githubCommit.repo,committerID,userName,profilePicLink FROM githubCommit,gitHubContributor where githubCommit.repo='"+repoName+"' AND committerID!='' AND date(commitDate)>'"+startDate+"' AND date(commitDate)<'"+endDate+"' AND committerID=id;";
-var commitData=db.query(commitDataQuery);
-if(commitData.length!=0)
-{
-
-	for(var i in commitData )
-   {
-
-	commitsPerProduct.push({
-	"sha":commitData[i].sha,
-	"commitDate":commitData[i].commitDate,
-	"committerID":commitData[i].committerID,
-	"name":commitData[i].userName,
-	"profilePicLink":commitData[i].profilePicLink
-	});
-}
-}
-
-
-
-}
-print(commitsPerProduct);
-
+    }
+    print(commitsPerProduct);
+    return commitsPerProduct;
 
 }
 getData();
